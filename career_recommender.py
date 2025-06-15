@@ -2,7 +2,7 @@ import os
 from typing import List, Dict, Tuple
 from dotenv import load_dotenv
 from mistralai.client import MistralClient
-from mistralai.models.chat_completion import ChatMessage
+from mistralai import Mistral
 
 from prompt_templates import (
     get_initial_prompt,
