@@ -359,6 +359,7 @@ if 'recommender' not in st.session_state:
     st.session_state.current_prompt = st.session_state.recommender.start_conversation()
     st.session_state.current_input_value = ""
     st.session_state.conversation_started = False
+    st.session_state.recommendations_shown = False  # New flag to track if recommendations have been shown
 
 # Function to handle submission and process input
 def handle_submit():
@@ -373,6 +374,7 @@ def handle_submit():
             })
             st.session_state.current_prompt = next_prompt
             st.session_state.current_input_value = ""
+            st.session_state.recommendations_shown = True  # Set flag to True after first submission
     else:
         st.warning("Please provide a response.")
 
@@ -395,22 +397,20 @@ for turn in st.session_state.display_history:
     if "recommendations" in turn and turn['recommendations']:
         st.markdown("### Your Career Path Recommendations")
         for rec in turn['recommendations']:
-            with st.expander(f"{rec['path']} - Confidence: {rec['confidence']:.0%}"):
-                confidence_class = "confidence-high" if rec['confidence'] > 0.7 else "confidence-medium" if rec['confidence'] > 0.4 else "confidence-low"
-                st.markdown(f"""
-                    <div class="recommendation-box">
-                        <h3>{rec['path']}<span class="confidence-badge {confidence_class}">{rec['confidence']:.0%}</span></h3>
-                        <p><strong>Overview:</strong><br>{rec['description']}</p>
-                        <p><strong>Recommended Career Options:</strong></p>
-                        <ol>
-                            {' '.join(f'<li>{career}</li>' for career in rec['careers'][:3])}
-                        </ol>
-                        <h4>Career Roadmap:</h4>
-                        <ol>
-                            {' '.join(f'<li>{step}</li>' for step in rec['roadmap'])}
-                        </ol>
-                    </div>
-                """, unsafe_allow_html=True)
+            confidence_class = "confidence-high" if rec['confidence'] > 0.7 else "confidence-medium" if rec['confidence'] > 0.4 else "confidence-low"
+            st.markdown(f"""
+                <h2>{rec['path']} <span class="confidence-badge {confidence_class}">{rec['confidence']:.0%}</span></h2>
+                <p><strong>Overview:</strong><br>{rec['description']}</p>
+                <p><strong>Recommended Career Options:</strong></p>
+                <ol>
+                    {' '.join(f'<li>{career}</li>' for career in rec['careers'][:3])}
+                </ol>
+                <p><strong>Career Roadmap:</strong></p>
+                <ol>
+                    {' '.join(f'<li>{step}</li>' for step in rec['roadmap'])}
+                </ol>
+                <hr>
+            """, unsafe_allow_html=True)
     
     if "ai_prompt" in turn:
         st.markdown(f"**AI:** {turn['ai_prompt']}")
@@ -418,6 +418,8 @@ for turn in st.session_state.display_history:
 # Display the current prompt
 if not st.session_state.display_history:
     st.markdown("### Let's Begin")
+elif st.session_state.recommendations_shown:
+    st.markdown("### Your Career Path Recommendations")
 
 st.markdown(st.session_state.current_prompt)
 
